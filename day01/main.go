@@ -98,6 +98,6 @@ func main() {
 
     answer1 := part1(buffer)
     answer2 := part2(buffer)
-    fmt.Println("Answer to puzzle 1:", answer1)
-    fmt.Println("Answer to puzzle 2:", answer2)
+    fmt.Println("Answer to part 1:", answer1)
+    fmt.Println("Answer to part 2:", answer2)
 }
