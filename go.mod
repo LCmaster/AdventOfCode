@@ -1,3 +1,3 @@
-module github.com/LCmaster/adventofcode_2023
+module github.com/LCmaster/AdventOfCode
 
 go 1.21.4
