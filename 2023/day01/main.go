@@ -9,31 +9,7 @@ import (
 	"strings"
 )
 
-func part1(input []string) int {
-    output := 0
-
-    for _, line := range input {
-        firstDigit := -1
-        lastDigit := 0
-
-        for _, ch := range line {
-            value, err := strconv.Atoi(string(ch))
-            if err == nil {
-                if firstDigit < 0 {
-                    firstDigit = value
-                }
-                lastDigit = value
-
-            }
-        }
-
-        output += firstDigit * 10 + lastDigit
-    }
-
-    return output
-}
-
-func part2(input []string) int {
+func extractFirstAndLastDigits(input string, checkForDigitNames bool) (int, int) {
     digitName := map[string]int {
         "zero"  :   0,
         "one"   :   1,
@@ -47,32 +23,47 @@ func part2(input []string) int {
         "nine"  :   9,
     }
 
-    output := 0
-    for _, line := range input {
-        firstDigit := -1
-        lastDigit := 0
+    first := -1
+    last := 0
 
-        for i, ch := range line {
-            value, err := strconv.Atoi(string(ch))
-
-            if err == nil {
-                if firstDigit < 0 {
-                    firstDigit = value
-                }
-                lastDigit = value
-            } else {
-                for name, value := range digitName {
-                    if strings.HasPrefix(line[i:], name) {
-                        if firstDigit < 0 {
-                            firstDigit = value
-                        }
-                        lastDigit = value
+    for i, ch := range input {
+        value, err := strconv.Atoi(string(ch))
+        if err == nil {
+            if first < 0 {
+                first = value
+            }
+            last = value
+        } else if checkForDigitNames {
+            for name, value := range digitName {
+                if strings.HasPrefix(input[i:], name) {
+                    if first < 0 {
+                        first = value
                     }
+                    last = value
                 }
             }
         }
+    }
+    return first, last
+}
 
-        output += firstDigit * 10 + lastDigit
+func part1(input []string) int {
+    output := 0
+
+    for _, line := range input {
+        first, last := extractFirstAndLastDigits(line, false)
+        output += first * 10 + last
+    }
+
+    return output
+}
+
+func part2(input []string) int {
+    output := 0
+
+    for _, line := range input {
+        first, last := extractFirstAndLastDigits(line, true)        
+        output += first * 10 + last
     }
 
     return output
