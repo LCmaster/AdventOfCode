@@ -15,7 +15,26 @@ func Test_part1(t *testing.T) {
     expect := 142
 
     if output != expect {
-        t.Errorf("Output: %q, Expected: %q", output, expect)
+        t.Errorf("Output: %d, Expected: %d", output, expect)
+    }
+}
+
+func Test_part2(t *testing.T) {
+    input := []string{
+        "two1nine",
+        "eightwothree",
+        "abcone2threexyz",
+        "xtwone3four",
+        "4nineeightseven2",
+        "zoneight234",
+        "7pqrstsixteen",
+    }
+
+    output := part2(input)
+    expect := 281
+
+    if output != expect {
+        t.Errorf("Output: %d, Expected: %d", output, expect)
     }
 }
 
