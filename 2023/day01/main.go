@@ -70,7 +70,7 @@ func part2(input []string) int {
 }
 
 func main() {
-    file, err := os.Open("./day01/input.txt")
+    file, err := os.Open("./2023/day01/input.txt")
     if err != nil {
         log.Fatal(err)
     }
