@@ -3,7 +3,7 @@ package main
 import "testing"
 
 
-func Test_part1(t *testing.T) {
+func TestPart1(t *testing.T) {
     input := []string{
         "1abc2",
         "pqr3stu8vwx",
@@ -19,7 +19,7 @@ func Test_part1(t *testing.T) {
     }
 }
 
-func Test_part2(t *testing.T) {
+func TestPart2(t *testing.T) {
     input := []string{
         "two1nine",
         "eightwothree",
