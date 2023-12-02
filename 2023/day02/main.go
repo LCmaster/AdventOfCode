@@ -10,11 +10,11 @@ import (
 	"github.com/LCmaster/AdventOfCode/utils"
 )
 
-func part1(input []string, maxRedAmount int, maxGreenAmount int, maxBlueAmount int) int {
+func extractGameSets(input []string) map[int][]int{
     gameMatcher := regexp.MustCompile("^Game ([0-9]+): (.*;*)")
     groupMatcher := regexp.MustCompile("([0-9]+) (red|green|blue)")
 
-    output := 0
+    output := make(map[int][]int)
 
     for _, line := range input {
         gameMatch := gameMatcher.FindStringSubmatch(line)
@@ -41,9 +41,25 @@ func part1(input []string, maxRedAmount int, maxGreenAmount int, maxBlueAmount i
             }
         }
 
-        testRedCubeAmount := totalCubes["red"] <= maxRedAmount
-        testGreenCubeAmount := totalCubes["green"] <= maxGreenAmount
-        testBlueCubeAmount := totalCubes["blue"] <= maxBlueAmount
+        output[id] = []int{
+            totalCubes["red"],
+            totalCubes["green"],
+            totalCubes["blue"],
+        }       
+    }
+
+    return output
+
+}
+
+func part1(input []string, maxRedAmount int, maxGreenAmount int, maxBlueAmount int) int {
+    gameSets := extractGameSets(input)
+    output := 0
+
+    for id, cubes := range gameSets {
+        testRedCubeAmount := cubes[0] <= maxRedAmount
+        testGreenCubeAmount := cubes[1] <= maxGreenAmount
+        testBlueCubeAmount := cubes[2] <= maxBlueAmount
 
         if testRedCubeAmount && testGreenCubeAmount && testBlueCubeAmount {
             output += id
@@ -54,32 +70,11 @@ func part1(input []string, maxRedAmount int, maxGreenAmount int, maxBlueAmount i
 }
 
 func part2(input []string) int {
-    gameMatcher := regexp.MustCompile("^Game ([0-9]+): (.*;*)")
-    groupMatcher := regexp.MustCompile("([0-9]+) (red|green|blue)")
-
+    gameSets := extractGameSets(input)
     output := 0
 
-    for _, line := range input {
-        gameMatch := gameMatcher.FindStringSubmatch(line)
-        plays := gameMatch[2]
-
-        totalCubes := map[string]int {"red": 0, "green": 0, "blue": 0}
-
-        for _, play := range strings.Split(plays, ";") {
-            for _, group := range strings.Split(play, ",") {
-                groupMatch := groupMatcher.FindStringSubmatch(group)
-                number, err := strconv.Atoi(groupMatch[1])
-                if err != nil {
-                    break
-                }
-                color := groupMatch[2]
-
-                if number > totalCubes[color] {
-                    totalCubes[color] = number
-                }
-            }
-        }
-        output += totalCubes["red"] * totalCubes["green"] * totalCubes["blue"]
+    for _, cubes := range gameSets {
+        output += cubes[0] * cubes[1] * cubes[2]
     }
 
     return output
