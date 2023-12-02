@@ -2,12 +2,12 @@ package main
 
 import (
 	"fmt"
-	"bufio"
 	"log"
-	"os"
 	"regexp"
 	"strconv"
 	"strings"
+
+	"github.com/LCmaster/AdventOfCode/utils"
 )
 
 func part1(input []string, maxRedAmount int, maxGreenAmount int, maxBlueAmount int) int {
@@ -88,29 +88,17 @@ func part2(input []string) int {
 
 
 func main() {
-    file, err := os.Open("./2023/day02/input.txt")
+    input, err := utils.ReadInputFile(2023, 2)
     if err != nil {
         log.Fatal(err)
     }
-    defer file.Close()
-
-    buffer := []string{}
-
-    scanner := bufio.NewScanner(file)
-    for scanner.Scan() {
-        buffer = append(buffer, scanner.Text())
-    }
-
-    if err := scanner.Err(); err != nil {
-        log.Fatal(err)
-    }
-
+    
     possibleRedCubesAmount := 12
     possibleGreenCubesAmount := 13
     possibleBlueCubesAmount := 14
 
-    answer1 := part1(buffer, possibleRedCubesAmount, possibleGreenCubesAmount, possibleBlueCubesAmount)
+    answer1 := part1(input, possibleRedCubesAmount, possibleGreenCubesAmount, possibleBlueCubesAmount)
     fmt.Println("Answer to part 1:", answer1)
-    answer2 := part2(buffer, possibleRedCubesAmount, possibleGreenCubesAmount, possibleBlueCubesAmount)
+    answer2 := part2(input)
     fmt.Println("Answer to part 2:", answer2)
 }

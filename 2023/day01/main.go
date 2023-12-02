@@ -1,12 +1,12 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
 	"log"
-	"os"
 	"strconv"
 	"strings"
+
+	"github.com/LCmaster/AdventOfCode/utils"
 )
 
 func extractFirstAndLastDigits(input string, checkForDigitNames bool) (int, int) {
@@ -70,25 +70,13 @@ func part2(input []string) int {
 }
 
 func main() {
-    file, err := os.Open("./2023/day01/input.txt")
+    input, err := utils.ReadInputFile(2023, 1)
     if err != nil {
         log.Fatal(err)
     }
-    defer file.Close()
 
-    buffer := []string{}
-
-    scanner := bufio.NewScanner(file)
-    for scanner.Scan() {
-        buffer = append(buffer, scanner.Text())
-    }
-
-    if err := scanner.Err(); err != nil {
-        log.Fatal(err)
-    }
-
-    answer1 := part1(buffer)
-    answer2 := part2(buffer)
+    answer1 := part1(input)
+    answer2 := part2(input)
     fmt.Println("Answer to part 1:", answer1)
     fmt.Println("Answer to part 2:", answer2)
 }
