@@ -24,7 +24,7 @@ func extractGameSets(input []string) map[int][]int{
         }
         plays := gameMatch[2]
 
-        totalCubes := map[string]int {"red": 0, "green": 0, "blue": 0}
+        totalCubes := make(map[string]int)
 
         for _, play := range strings.Split(plays, ";") {
             for _, group := range strings.Split(play, ",") {
