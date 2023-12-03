@@ -70,6 +70,70 @@ func part1(input []string) int {
     return output
 }
 
+func part2(input []string) int {
+    numberMatcher := regexp.MustCompile("[0-9]+")
+    output := 0
+    
+    numbers := make(map[int]map[int]string)
+    for i, line := range input {
+        for _, entry := range numberMatcher.FindAllStringIndex(line, -1) {
+            if len(entry) > 0 {
+                _, ok := numbers[i]
+                if !ok {
+                    numbers[i] = make(map[int]string)
+                }
+                
+                numbers[i][entry[0]] = line[entry[0]:entry[1]]
+            }
+        }
+    }
+
+    for i, line := range input {
+        for j, ch := range line {
+            switch ch {
+                case '.', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' :
+                    continue
+                default :
+                    vOffset, hOffset := -1, -1
+                    vCount, hCount := 3, 3
+                    if i == 0 || i == len(input)-1 {
+                        vCount = 2
+                    }
+                    if j == 0 || j == len(line)-1 {
+                        hCount = 2
+                    }
+                    
+                    numbersAround := []int{}
+                    for x := 0; x < hCount; x++ {
+                        for y := 0; y < vCount; y++ {
+                            row := i+vOffset+y
+                            column := j+hOffset+x
+                            
+                            for start, numberStr := range numbers[row] {
+                                end := len(numberStr) + start -1
+                                if column >= start && column <= end {
+                                    number, err := strconv.Atoi(numberStr)
+                                    if err == nil {
+                                        numbersAround = append(numbersAround, number)
+                                    }
+                                    delete(numbers[row], start)
+                                }
+                            }
+                            
+                        }
+                    }
+
+                    if ch == '*' && len(numbersAround) == 2 {
+                        output += numbersAround[0] * numbersAround[1]
+                    } 
+            }
+        }
+    }
+
+    return output
+}
+
+
 func main() {
     input, err := utils.ReadInputFile(2023, 3)
     if err != nil {
@@ -77,4 +141,6 @@ func main() {
     }
     answer1 := part1(input)
     fmt.Println("Answer to part 1:", answer1)
+    answer2 := part2(input)
+    fmt.Println("Answer to part 2:", answer2)
 }
