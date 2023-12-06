@@ -14,10 +14,6 @@ func extractTimes(input []string) []int {
 
     for _, line := range input {
         line = strings.TrimSpace(line)
-        if line == "" {
-            continue
-        }
-
         if strings.HasPrefix(line, "Time:") {
             tokens := strings.Split(line, " ")
             for _, token := range tokens {
@@ -27,7 +23,6 @@ func extractTimes(input []string) []int {
                 }
             }
         }
-
     }
 
     return times
@@ -38,10 +33,6 @@ func extractDistances(input []string) []int {
     
     for _, line := range input {
         line = strings.TrimSpace(line)
-        if line == "" {
-            continue
-        }
-
         if strings.HasPrefix(line, "Distance:") {
             tokens := strings.Split(line, " ")
             for _, token := range tokens {
@@ -51,7 +42,6 @@ func extractDistances(input []string) []int {
                 }
             }
         }
-
     }
 
     return distances
@@ -61,7 +51,7 @@ func part1(input []string) int {
     times := extractTimes(input)
     distances := extractDistances(input)
 
-    buffer := []int{}
+    output := 1
     for i := 0; i < len(times); i++ {
         time := times[i]
         recordDistance := distances[i]
@@ -75,11 +65,6 @@ func part1(input []string) int {
             }
         }
 
-        buffer = append(buffer, waysToWin)
-    }
-
-    output := 1
-    for _, waysToWin := range buffer {
         output *= waysToWin
     }
 
