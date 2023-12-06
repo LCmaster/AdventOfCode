@@ -89,7 +89,6 @@ func part2(input []string) int {
     return output
 }
 
-
 func main() {
     input, err := utils.ReadInputFile(2023, 6)
     if err != nil {
