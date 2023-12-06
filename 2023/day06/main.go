@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"math"
 	"strconv"
 	"strings"
 
@@ -47,25 +48,21 @@ func extractDistances(input []string) []int {
     return distances
 }
 
+func bhaskaraSolver(a float64, b float64, c float64) []float64 {
+    output := make([]float64, 2)
+    output[0] = (-b + math.Sqrt(math.Pow(b, 2) - 4*a*c))/(2*a)
+    output[1] = (-b - math.Sqrt(math.Pow(b, 2) - 4*a*c))/(2*a)
+    return output
+}
+
 func part1(input []string) int {
     times := extractTimes(input)
     distances := extractDistances(input)
 
     output := 1
     for i := 0; i < len(times); i++ {
-        time := times[i]
-        recordDistance := distances[i]
-
-        waysToWin := 0
-        for j := 0; j < time; j++ {
-            timeRemaining := time - j
-            distance := timeRemaining * j
-            if distance > recordDistance {
-                waysToWin++
-            }
-        }
-
-        output *= waysToWin
+        limit := bhaskaraSolver(-1, float64(times[i]), -float64(distances[i]+1))
+        output *= int(math.Floor(limit[1])) - int(math.Ceil(limit[0])) + 1
     }
 
     return output
@@ -83,18 +80,13 @@ func part2(input []string) int {
     }
 
     time, _ := strconv.Atoi(timeStr)
-    recordDistance, _ := strconv.Atoi(distanceStr)
+    distance, _ := strconv.Atoi(distanceStr)
 
-    waysToWin := 0
-    for j := 0; j < time; j++ {
-        timeRemaining := time - j
-        distance := timeRemaining * j
-        if distance > recordDistance {
-            waysToWin++
-        }
-    }
+    output := 1
+    limit := bhaskaraSolver(-1, float64(time), -float64(distance+1))
+    output *= int(math.Floor(limit[1])) - int(math.Ceil(limit[0])) + 1
 
-    return waysToWin
+    return output
 }
 
 
