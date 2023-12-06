@@ -95,9 +95,6 @@ func main() {
     if err != nil {
         log.Fatal(err)
     }
-
-    answer1 := part1(input)
-    answer2 := part2(input)
-    fmt.Println("Answer to part 1:", answer1)
-    fmt.Println("Answer to part 2:", answer2)
+    fmt.Println("Answer to part 1:", part1(input))
+    fmt.Println("Answer to part 2:", part2(input))
 }
