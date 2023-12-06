@@ -61,8 +61,8 @@ func part1(input []string) int {
 
     output := 1
     for i := 0; i < len(times); i++ {
-        limit := bhaskaraSolver(-1, float64(times[i]), -float64(distances[i]+1))
-        output *= int(math.Floor(limit[1])) - int(math.Ceil(limit[0])) + 1
+        limit := bhaskaraSolver(-1, float64(times[i]), -float64(distances[i]+ 1))
+        output *= int(math.Floor(limit[1]) - math.Ceil(limit[0]) + 1)
     }
 
     return output
@@ -83,8 +83,8 @@ func part2(input []string) int {
     distance, _ := strconv.Atoi(distanceStr)
 
     output := 1
-    limit := bhaskaraSolver(-1, float64(time), -float64(distance+1))
-    output *= int(math.Floor(limit[1])) - int(math.Ceil(limit[0])) + 1
+    limit := bhaskaraSolver(-1, float64(time), -float64(distance + 1))
+    output *= int(math.Floor(limit[1]) - math.Ceil(limit[0]) + 1)
 
     return output
 }
