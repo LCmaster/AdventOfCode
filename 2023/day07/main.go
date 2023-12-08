@@ -18,7 +18,7 @@ type Hand struct {
     bid int
 }
 
-func getCardValue(card rune) int {
+func getCardValue(card rune, joker rune) int {
     cardValue := 0
     switch card {
     case 'A':
@@ -36,6 +36,10 @@ func getCardValue(card rune) int {
         cardValue = value
     }
 
+    if joker == card {
+        cardValue = 1
+    }
+
     return cardValue
 }
 
@@ -50,8 +54,7 @@ func getHandStrengh(cards []rune) int {
     for _, ch := range cards {
         cardCount[ch] += 1
     }
-
-    strength := 0
+        strength := 0
     for _, count := range cardCount {
         if count >= 2 {
             strength += int(math.Pow(10, float64(count)))
@@ -62,7 +65,6 @@ func getHandStrengh(cards []rune) int {
 
 func part1(input []string) int {
     output := 0
-
     hands := []Hand{} 
     for _, line := range input {
         line = strings.TrimSpace(line)
@@ -78,7 +80,71 @@ func part1(input []string) int {
         }
         bid, _ := strconv.Atoi(token[1])
         strength := getHandStrengh(cards)
-        
+                hands = append(hands, Hand{
+            cards: cards,
+            strength: strength,
+            bid: bid,
+        })
+    }
+    slices.SortFunc(
+        hands, 
+        func(a, b Hand) int { 
+            result := cmp.Compare(a.strength, b.strength)
+            if result == 0 {
+                for i := 0; i < len(a.cards); i++ {
+                    result = cmp.Compare(
+                        getCardValue(a.cards[i], ' '),
+                        getCardValue(b.cards[i], ' '),
+                    )
+                    if result != 0 {
+                        break
+                    }
+                }
+            }
+            return result
+        },
+    )
+    for i, hand := range hands {
+        output += (i+1) * hand.bid
+    }
+
+    return output
+}
+
+func part2(input []string) int {
+    deck := []rune{'2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A'}
+    joker := 'J'
+
+    output := 0
+    hands := []Hand{} 
+    for _, line := range input {
+        line = strings.TrimSpace(line)
+        if line == "" {
+            continue
+        }
+
+        token := strings.Split(line, " ")
+
+        cards := make([]rune, 5)
+        for _, ch := range strings.TrimSpace(token[0]) {
+            cards = append(cards, ch)
+        }
+        bid, _ := strconv.Atoi(token[1])
+        strength := getHandStrengh(cards)
+
+        for _, replacement := range deck {
+            newCards := append([]rune{}, cards...)
+            for i, ch := range newCards {
+                if ch == joker {
+                    newCards[i] = replacement
+                }
+            }
+            newCardsStrength := getHandStrengh(newCards)
+            if newCardsStrength > strength {
+                strength = newCardsStrength
+            }
+        }
+
         hands = append(hands, Hand{
             cards: cards,
             strength: strength,
@@ -92,8 +158,8 @@ func part1(input []string) int {
             if result == 0 {
                 for i := 0; i < len(a.cards); i++ {
                     result = cmp.Compare(
-                        getCardValue(a.cards[i]),
-                        getCardValue(b.cards[i]),
+                        getCardValue(a.cards[i], joker),
+                        getCardValue(b.cards[i], joker),
                     )
                     if result != 0 {
                         break
@@ -106,11 +172,8 @@ func part1(input []string) int {
     for i, hand := range hands {
         output += (i+1) * hand.bid
     }
-    return output
-}
 
-func part2(input []string) int {
-    return 0
+    return output
 }
 
 func main() {
@@ -120,4 +183,5 @@ func main() {
     }
 
     fmt.Println("Answer to part 1:", part1(input))
+    fmt.Println("Answer to part 2:", part2(input))
 }
