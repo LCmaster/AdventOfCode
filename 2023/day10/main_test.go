@@ -6,8 +6,8 @@ func TestPart1(t *testing.T) {
     input := []string{
         "..F7.",
         ".FJ|.",
-        "SJ.L7",
-        "|F--J",
+        "FJ.L7",
+        "SF--J",
         "LJ...",
     }
     output := part1(input)
