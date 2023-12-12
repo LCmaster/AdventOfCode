@@ -16,7 +16,7 @@ func TestPart1(t *testing.T) {
         "#...#.....",
     }
 
-    output := part1(input)
+    output := part1(input, 2)
     expected := 374
 
     if output != expected {
@@ -38,8 +38,8 @@ func TestPart2(t *testing.T) {
         "#...#.....",
     }
 
-    output := part2(input)
-    expected := 8410
+    output := part2(input, 100)
+    expected := 8410 
 
     if output != expected {
         t.Errorf("Day11 TestPart2 => Output: %d, Expected: %d", output, expected)

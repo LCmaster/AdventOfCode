@@ -34,32 +34,26 @@ func transpose(spaceMap [][]int) [][]int {
     return result
 }
 
-func multiplyIdenticalLines(slice [][]int, factor int) [][]int {
-    result := [][]int{}
-    for _, line := range slice {
+func getEmptyRows(spaceMap [][]int) []int {
+    result := []int{}
+    for i, line := range spaceMap {
         diff := 0
         for _, tile := range line {
             diff += tile
         }
-        result = append(result, line)
         if diff == 0 {
-            for i := 0; i < factor - 1; i ++ {
-                result = append(result, line)
-            }
+            result = append(result, i)
         }
     }
+    
     return result
 }
 
-func generateRealMap(spaceMap [][]int, expansionFactor int) [][]int {
-    result := multiplyIdenticalLines(spaceMap, expansionFactor)
-    result = transpose(result)
-    result = multiplyIdenticalLines(result, expansionFactor)
-    return transpose(result)
-}
+func part1(input []string, expansionRate int) int {
+    spaceMap := generateMapFromInput(input)
+    emptyRows := getEmptyRows(spaceMap)
+    emptyColumns := getEmptyRows(transpose(spaceMap))
 
-func part1(input []string) int {
-    spaceMap := generateRealMap(generateMapFromInput(input), 2)
     gallaxy := make(map[int][]int)
     gallaxyId := []int{}
     output := 0
@@ -77,16 +71,49 @@ func part1(input []string) int {
         for j := i+1; j < len(gallaxyId); j++ {
             g1 := gallaxyId[i]
             g2 := gallaxyId[j]
-            dist := int(math.Abs(float64(gallaxy[g2][0] - gallaxy[g1][0])) + math.Abs(float64(gallaxy[g2][1] - gallaxy[g1][1])))
-            // fmt.Printf("%d <=> %d = %d\n", g1, g2, dist)
+            g1Coords := []int{gallaxy[g1][0], gallaxy[g1][1]}
+            g2Coords := []int{gallaxy[g2][0], gallaxy[g2][1]}
+
+            g1Diff := make([]int, 2)
+            g2Diff := make([]int, 2)
+            for _, x := range emptyColumns {
+                if x < g1Coords[0] {
+                    g1Diff[0] += expansionRate-1
+                }
+                if x < g2Coords[0] {
+                    g2Diff[0] += expansionRate-1
+                }
+            }
+
+            for _, y := range emptyRows {
+                if y < g1Coords[1] {
+                    g1Diff[1] += expansionRate-1
+                }
+                if y < g2Coords[1] {
+                    g2Diff[1] += expansionRate-1
+                }
+            }
+
+            g1Coords[0] += g1Diff[0]
+            g1Coords[1] += g1Diff[1]
+            g2Coords[0] += g2Diff[0]
+            g2Coords[1] += g2Diff[1]
+
+            distX := math.Abs(float64(g2Coords[0] - g1Coords[0]))
+            distY := math.Abs(float64(g2Coords[1] - g1Coords[1]))
+            dist := int(distX + distY)
+
             output += dist
         }
     }
     return output
 }
 
-func part2(input []string) int {
-    spaceMap := generateRealMap(generateMapFromInput(input), 1000000)
+func part2(input []string, expansionRate int) int {
+    spaceMap := generateMapFromInput(input)
+    emptyRows := getEmptyRows(spaceMap)
+    emptyColumns := getEmptyRows(transpose(spaceMap))
+
     gallaxy := make(map[int][]int)
     gallaxyId := []int{}
     output := 0
@@ -104,7 +131,38 @@ func part2(input []string) int {
         for j := i+1; j < len(gallaxyId); j++ {
             g1 := gallaxyId[i]
             g2 := gallaxyId[j]
-            dist := int(math.Abs(float64(gallaxy[g2][0] - gallaxy[g1][0])) + math.Abs(float64(gallaxy[g2][1] - gallaxy[g1][1])))
+            g1Coords := []int{gallaxy[g1][0], gallaxy[g1][1]}
+            g2Coords := []int{gallaxy[g2][0], gallaxy[g2][1]}
+
+            g1Diff := make([]int, 2)
+            g2Diff := make([]int, 2)
+            for _, x := range emptyColumns {
+                if x < g1Coords[0] {
+                    g1Diff[0] += expansionRate-1
+                }
+                if x < g2Coords[0] {
+                    g2Diff[0] += expansionRate-1
+                }
+            }
+
+            for _, y := range emptyRows {
+                if y < g1Coords[1] {
+                    g1Diff[1] += expansionRate-1
+                }
+                if y < g2Coords[1] {
+                    g2Diff[1] += expansionRate-1
+                }
+            }
+
+            g1Coords[0] += g1Diff[0]
+            g1Coords[1] += g1Diff[1]
+            g2Coords[0] += g2Diff[0]
+            g2Coords[1] += g2Diff[1]
+
+            distX := math.Abs(float64(g2Coords[0] - g1Coords[0]))
+            distY := math.Abs(float64(g2Coords[1] - g1Coords[1]))
+            dist := int(distX + distY)
+
             output += dist
         }
     }
@@ -118,6 +176,6 @@ func main() {
         log.Fatal(err)
     }
 
-    fmt.Println("Answer to par 1", part1(input))
-    fmt.Println("Answer to par 2", part2(input))
+    fmt.Println("Answer to par 1", part1(input, 2))
+    fmt.Println("Answer to par 2", part2(input, 1000000))
 }
