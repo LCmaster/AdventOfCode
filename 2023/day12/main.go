@@ -3,84 +3,106 @@ package main
 import (
 	"fmt"
 	"log"
-	"regexp"
 	"strconv"
 	"strings"
 
 	"github.com/LCmaster/AdventOfCode/utils"
 )
 
-type Record struct {
-    template string
-    inputs []int
+func generateKey(template string, groups[]int) string {
+    keyParts := make([]string, len(groups)+1)
+    keyParts[0] = template
+    for i, group := range groups {
+        keyParts[i+1] = strconv.Itoa(group)
+    }
+    return strings.Join(keyParts, ",")
 }
 
-func getVariations(line, prefix string, validator *regexp.Regexp) []string {
-    result := []string{}
-    if len(prefix) < len(line) {
-        ch := line[len(prefix)]
-        if ch == '?' {
-            for _, token := range []string{".", "#"} {
-                for _, variant := range getVariations(line, prefix+token, validator) {
-                    if validator.MatchString(variant) {
-                        result = append(result, variant)
-                    }
-                }
-            }
+func getVariations(template string, groups []int, cache *map[string]int) int {
+    key := generateKey(template, groups)
+
+    if cachedValue,ok := (*cache)[key]; ok {
+        return cachedValue
+    } 
+    
+    if len(template) == 0 {
+        if len(groups) == 0 {
+            return 1
         } else {
-            token := string(ch)
-            for _, variant := range getVariations(line, prefix+token, validator) {
-                if validator.MatchString(variant) {
-                    result = append(result, variant)
-                }
-            }
-        }
-    } else {
-        if validator.MatchString(prefix) {
-            result = append(result, prefix)
+            return 0
         }
     }
 
-    return result
+    switch template[0] {
+    case '?':
+        res := getVariations(strings.Replace(template, "?", ".", 1), groups, cache)
+        res += getVariations(strings.Replace(template, "?", "#", 1), groups, cache)
+        return res
+    case '.':
+        res := getVariations(strings.TrimPrefix(template, "."), groups, cache)
+        (*cache)[key] = res
+        return res
+    case '#':
+        if len(groups) == 0 {
+            (*cache)[key] = 0
+            return 0
+        }
+        if len(template) < groups[0] {
+            (*cache)[key] = 0
+            return 0
+        }
+        if strings.Contains(template[0:groups[0]], ".") {
+            (*cache)[key] = 0
+            return 0
+        }
+        if len(groups) > 1 {
+            if len(template) < groups[0]+1 || string(template[groups[0]]) == "#" {
+                (*cache)[key] = 0
+                return 0
+            }
+            res := getVariations(template[groups[0]+1:], groups[1:], cache)
+            (*cache)[key] = res
+            return res
+        } else {
+            res := getVariations(template[groups[0]:], groups[1:], cache)
+            (*cache)[key] = res
+            return res
+        }
+}
+
+    return 0
 }
 
 func part1(input []string) int {
     output := 0
+    cache := make(map[string]int)
     for _, line := range input {
         token := strings.Split(line, " ")
-        groups := strings.Split(token[1], ",")
-        totalBroken := 0
-        regex := "\\.*"
-        for i, group := range groups {
-            if i > 0 {
-                regex += "\\.+"
-            }
-            regex += "#{"+group+"}"
-
-            val, err := strconv.Atoi(group)
-            if err == nil {
-                totalBroken += val
-            }
+        groups := []int{}
+        for _, num := range strings.Split(token[1], ",") {
+            val, _ := strconv.Atoi(num)
+            groups = append(groups, val)
         }
-        regex += "\\.*"
-        validator := regexp.MustCompile(regex)
 
-        variants := getVariations(token[0], "", validator)
-        for _, variant := range variants {
-            broken := 0
-            for _, ch := range variant {
-                if ch == '#' {
-                    broken++
-                }
-            }
-            if broken == totalBroken {
-                if validator.MatchString(variant) {
-                    output++
-                }
-            }
-        }
+        output += getVariations(token[0], groups, &cache)
     }
     return output
+}
+
+func part2(input []string) int {
+    newInput := make([]string, len(input))
+    for i, line := range input {
+        token := strings.Split(line, " ")
+        template := make([]string, 5)
+        groups := make([]string, 5)
+        for j := 0; j < 5; j++ {
+            template[j] = token[0]
+            groups[j] = token[1]
+        }
+        newLine := strings.Join(template, "?")+" "+strings.Join(groups, ",")
+        newInput[i] = newLine
+    }
+    return part1(newInput)
 }
 
 func main() {
@@ -90,4 +112,5 @@ func main() {
     }
 
     fmt.Println("Answer to part 1", part1(input))
+    fmt.Println("Answer to part 2", part2(input))
 }
