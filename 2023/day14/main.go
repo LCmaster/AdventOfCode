@@ -88,28 +88,27 @@ func part1(input []string) int {
     return calculateLoad(slideNorth(input))
 }
 
+type Record struct {
+    next string
+    load int
+}
+
 func part2(input []string, cycles int) int {
-    cache := make(map[string]string)
+    cache := make(map[string]int)
+    load := make([]int, 0)
     key := generateKey(input)
-    i := 0
-    for i < cycles {
-        if next, ok := cache[key]; ok {
-            if i + len(cache) < cycles {
-                i += len(cache)
-            }else {
-                i++
-            }
-            key = next
-        } else {
-            result := runCycle(strings.Split(key, ","))
-            next := generateKey(result)
-            cache[key] = next
-            
-            key = next
-            i++
+    for i := 0; i < cycles; i++ {
+        if _, ok := cache[key]; ok { 
+            break
         }
+        load = append(load, calculateLoad(input))
+        input = runCycle(input)
+        cache[key] = i
+
+        key = generateKey(input)
     }
-    return calculateLoad(strings.Split(key, ","))
+    index := cache[key] + (cycles-cache[key]) % (len(load)-cache[key])
+    return load[index]
 }
 
 
