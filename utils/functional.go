@@ -19,3 +19,10 @@ func Filter[T any](input []T, predicate func(T) bool) []T {
     }
     return output
 }
+
+func Reduce[T any](input[]T, reducer func(T, T) T, value T) T {
+    for _, element := range input {
+        value = reducer(element, value)
+    }
+    return value
+}
