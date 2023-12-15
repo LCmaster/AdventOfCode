@@ -16,11 +16,11 @@ type Lens struct {
 
 type Box map[string]Lens
 
-func hash(input string) int {
-    output := 0
-    for _, ch := range input {
-        output = (17 * (output + int(ch))) % 256
-    }
+func hash(input string, initialValue int) int {
+    output := 17 * (initialValue + int(input[0])) % 256 
+    if len(input) > 1 {
+        return hash(input[1:], output)
+    } 
     return output
 }
 
@@ -29,7 +29,7 @@ func part1(input []string) int {
     for _, line := range input {
         if len(line) > 0 {
             for _, str := range strings.Split(strings.TrimSpace(line), ",") {
-                output += hash(str)
+                output += hash(str, 0)
             }
         }
     }
@@ -48,7 +48,7 @@ func part2(input []string) int {
             for _, str := range strings.Split(strings.TrimSpace(line), ",") {
                 if str[len(str)-1] == '-' {
                     label := str[:len(str)-1]
-                    boxId := hash(label)
+                    boxId := hash(label, 0)
 
                     lens, ok := box[boxId][label]
                     if ok {
@@ -60,7 +60,7 @@ func part2(input []string) int {
                         }
                     }
                 } else if label, focalStr, ok := strings.Cut(str, "="); ok {
-                    boxId := hash(label)
+                    boxId := hash(label, 0)
                     focalLength, _ := strconv.Atoi(focalStr)
                     
                     lens, ok := box[boxId][label]
