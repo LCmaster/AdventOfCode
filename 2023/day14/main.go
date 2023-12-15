@@ -16,12 +16,7 @@ func slideNorth(input []string) []string {
                 for (i-(k+1)) >= 0 && input[i-(k+1)][j] == '.' {
                     k++
                 }
-                south := []rune(input[i])
-                north := []rune(input[i-k])
-                south[j] = '.'
-                north[j] = 'O'
-                input[i] = string(south)
-                input[i-k] = string(north)
+                input[i], input[i-k] = utils.SwitchStringCharacters(input[i], input[i-k], j, j)
             }
         }
     }
@@ -36,10 +31,7 @@ func slideWest(input []string) []string {
                 for (j-(k+1)) >= 0 && input[i][j-(k+1)] == '.' {
                     k++
                 }
-                line := []rune(input[i])
-                line[j] = '.'
-                line[j-k] = 'O'
-                input[i] = string(line)
+                input[i] = utils.SwitchCharacters(input[i], j, j-k)
             }
         }
     }
@@ -54,12 +46,7 @@ func slideSouth(input []string) []string {
                 for (i+k+1) <= len(input)-1 && input[i+k+1][j] == '.' {
                     k++
                 }
-                north := []rune(input[i])
-                south := []rune(input[i+k])
-                north[j] = '.'
-                south[j] = 'O'
-                input[i] = string(north)
-                input[i+k] = string(south)
+                input[i], input[i+k] = utils.SwitchStringCharacters(input[i], input[i+k], j, j)
             }
         }
     }
@@ -74,10 +61,7 @@ func slideEast(input []string) []string {
                 for (j+k+1) <= len(input[i])-1 && input[i][j+k+1] == '.' {
                     k++
                 }
-                line := []rune(input[i])
-                line[j] = '.'
-                line[j+k] = 'O'
-                input[i] = string(line)
+                input[i] = utils.SwitchCharacters(input[i], j, j+k)
             }
         }
     }

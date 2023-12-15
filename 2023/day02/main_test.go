@@ -13,7 +13,7 @@ func TestPart1(t *testing.T) {
         "Game 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green",
     }
     
-    output := part1(input, 12, 13, 14) 
+    output := part1(input) 
     expected := 8
     
     if output != expected {

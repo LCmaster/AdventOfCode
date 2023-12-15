@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"log"
-	"regexp"
 	"strconv"
 	"strings"
 
@@ -11,57 +10,45 @@ import (
 )
 
 func extractGameSets(input []string) map[int][]int{
-    gameMatcher := regexp.MustCompile("^Game ([0-9]+): (.*;*)")
-    groupMatcher := regexp.MustCompile("([0-9]+) (red|green|blue)")
-
     output := make(map[int][]int)
-
-    for _, line := range input {
-        gameMatch := gameMatcher.FindStringSubmatch(line)
-        id, err := strconv.Atoi(gameMatch[1])
-        if err != nil {
-            continue
-        }
-        plays := gameMatch[2]
-
-        totalCubes := make(map[string]int)
-
-        for _, play := range strings.Split(plays, ";") {
-            for _, group := range strings.Split(play, ",") {
-                groupMatch := groupMatcher.FindStringSubmatch(group)
-                number, err := strconv.Atoi(groupMatch[1])
-                if err != nil {
-                    break
+    for _, result := range utils.Map[string, []int](input, func(line string, index int) []int {
+        cubes := make(map[string]int)
+        id := -1
+        if gameId, games, ok := strings.Cut(line, ":"); ok {
+            idStr := ""
+            for _, ch := range gameId {
+                if ch >= '0' && ch <= '9' {
+                    idStr += string(ch)
                 }
-                color := groupMatch[2]
-
-                if number > totalCubes[color] {
-                    totalCubes[color] = number
+            }
+            id, _ = strconv.Atoi(idStr)
+            for _, game := range strings.Split(games, ";") {
+                for _, group := range strings.Split(strings.TrimSpace(game), ",") {
+                    part := strings.Split(strings.TrimSpace(group), " ")
+                    color := part[1]
+                    amount, _ := strconv.Atoi(part[0])
+                    if cubes[color] < amount {
+                        cubes[color] = amount
+                    }
                 }
             }
         }
-
-        output[id] = []int{
-            totalCubes["red"],
-            totalCubes["green"],
-            totalCubes["blue"],
-        }       
+        return []int{id, cubes["red"], cubes["green"], cubes["blue"]}
+    }) {
+        output[result[0]] = result[1:]
     }
-
     return output
-
 }
 
-func part1(input []string, maxRedAmount int, maxGreenAmount int, maxBlueAmount int) int {
-    gameSets := extractGameSets(input)
+func part1(input []string) int {
     output := 0
-
-    for id, cubes := range gameSets {
-        testRedCubeAmount := cubes[0] <= maxRedAmount
-        testGreenCubeAmount := cubes[1] <= maxGreenAmount
-        testBlueCubeAmount := cubes[2] <= maxBlueAmount
-
-        if testRedCubeAmount && testGreenCubeAmount && testBlueCubeAmount {
+    maxAmount := []int{12, 13, 14}
+    for id, cubes := range extractGameSets(input) {
+        test := true
+        for i, amount := range cubes {
+            test = test && amount <= maxAmount[i]
+        }
+        if test {
             output += id
         }        
     }
@@ -70,30 +57,20 @@ func part1(input []string, maxRedAmount int, maxGreenAmount int, maxBlueAmount i
 }
 
 func part2(input []string) int {
-    gameSets := extractGameSets(input)
     output := 0
-
-    for _, cubes := range gameSets {
+    for _, cubes := range extractGameSets(input) {
         output += cubes[0] * cubes[1] * cubes[2]
     }
 
     return output
 }
 
-
-
 func main() {
     input, err := utils.ReadInputFile(2023, 2)
     if err != nil {
         log.Fatal(err)
     }
-    
-    possibleRedCubesAmount := 12
-    possibleGreenCubesAmount := 13
-    possibleBlueCubesAmount := 14
 
-    answer1 := part1(input, possibleRedCubesAmount, possibleGreenCubesAmount, possibleBlueCubesAmount)
-    fmt.Println("Answer to part 1:", answer1)
-    answer2 := part2(input)
-    fmt.Println("Answer to part 2:", answer2)
+    fmt.Println("Answer to part 1:", part1(input))
+    fmt.Println("Answer to part 2:", part2(input))
 }
