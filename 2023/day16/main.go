@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"math"
 	"sync"
 
 	"github.com/LCmaster/AdventOfCode/utils"
@@ -11,8 +12,6 @@ import (
 type any interface{}
 var empty any
 
-var cache = make(map[string]any)
-var cacheLock sync.Mutex
 
 var (
     Up = [2]int{0, -1}
@@ -55,19 +54,18 @@ func generateGrid(input []string) [][]rune {
     return grid
 }
 
-func getBeamEnergyGrid(beam *Beam, grid *[][]rune, wg *sync.WaitGroup, ch chan [2]int) {
-
+func getBeamEnergyGrid(beam *Beam, grid *[][]rune, wg *sync.WaitGroup, ch chan [2]int, cache *map[string]any, lock *sync.Mutex) {
     for beam.x >= 0 && beam.x < len((*grid)[0]) && beam.y >= 0 && beam.y < len(*grid)  {
         infiniteLoop := false
         key := fmt.Sprintf("(%d,%d) => [%d,%d]", beam.x, beam.y, beam.direction[0], beam.direction[1])
         
-        cacheLock.Lock()
-        if _, ok := cache[key]; ok {
+        lock.Lock()
+        if _, ok := (*cache)[key]; ok {
             infiniteLoop = true
         } else {
-            cache[key] = empty
+            (*cache)[key] = empty
         }
-        cacheLock.Unlock()
+        lock.Unlock()
 
         if infiniteLoop {
             break
@@ -99,13 +97,13 @@ func getBeamEnergyGrid(beam *Beam, grid *[][]rune, wg *sync.WaitGroup, ch chan [
             if beam.direction == Up || beam.direction == Down{
                 beam.LookLeft()
                 wg.Add(1)
-                go getBeamEnergyGrid(&Beam{beam.x+1, beam.y, Right}, grid, wg, ch)
+                go getBeamEnergyGrid(&Beam{beam.x+1, beam.y, Right}, grid, wg, ch, cache, lock)
             }
         case '|':
             if beam.direction == Left || beam.direction == Right{
                 beam.LookUp()
                 wg.Add(1)
-                go getBeamEnergyGrid(&Beam{beam.x, beam.y+1, Down}, grid, wg, ch)
+                go getBeamEnergyGrid(&Beam{beam.x, beam.y+1, Down}, grid, wg, ch, cache, lock)
             }
         }
         beam.Move()
@@ -113,17 +111,19 @@ func getBeamEnergyGrid(beam *Beam, grid *[][]rune, wg *sync.WaitGroup, ch chan [
     wg.Done()
 }
 
-func part1(input []string) int {
-    grid := generateGrid(input)
-    energyGrid := make([][]bool, len(grid))
-    for y, row := range grid {
+func countEnergizedTiles(x, y int, direction [2]int, grid *[][]rune) int {
+    var cache = make(map[string]any)
+    var lock sync.Mutex
+
+    energyGrid := make([][]bool, len(*grid))
+    for y, row := range *grid {
         energyGrid[y] = make([]bool, len(row))
     }
 
     var wg sync.WaitGroup
     ch := make(chan [2]int)
     wg.Add(1)
-    go getBeamEnergyGrid(&Beam{0, 0, Right}, &grid, &wg, ch)
+    go getBeamEnergyGrid(&Beam{x, y, direction}, grid, &wg, ch, &cache, &lock)
     go func() {
         wg.Wait()
         close(ch)
@@ -132,7 +132,7 @@ func part1(input []string) int {
     output := 0
     for coords := range ch {
         x, y := coords[0], coords[1]
-        if x >= 0 && x < len(grid) && y >= 0 && y < len(grid[0]) {
+        if x >= 0 && x < len(*grid) && y >= 0 && y < len((*grid)[0]) {
             if !energyGrid[y][x] {
                 output++
             }
@@ -143,11 +143,62 @@ func part1(input []string) int {
     return output
 }
 
+func part1(input []string) int {
+    grid := generateGrid(input)
+    return countEnergizedTiles(0, 0, Right, &grid)
+}
+
+func part2(input []string) int {
+    grid := generateGrid(input)
+    output := 0
+    for y := 0; y < len(grid); y++ {
+        for x := 0; x < len(grid[0]); x++ {
+            result := 0
+            if x == 0 && y == 0 {
+                res1 := float64(countEnergizedTiles(x, y, Right, &grid))
+                res2 := float64(countEnergizedTiles(x, y, Down, &grid))
+                result = int(math.Max(res1, res2))
+            } else if x == len(grid[0])-1 && y == 0 {
+                res1 := float64(countEnergizedTiles(x, y, Left, &grid))
+                res2 := float64(countEnergizedTiles(x, y, Down, &grid))
+                result = int(math.Max(res1, res2))
+            } else if x == 0 && y == len(grid) - 1 {
+                res1 := float64(countEnergizedTiles(x, y, Left, &grid))
+                res2 := float64(countEnergizedTiles(x, y, Down, &grid))
+                result = int(math.Max(res1, res2))
+            } else if x == 0 && y == len(grid) - 1 {
+                res1 := float64(countEnergizedTiles(x, y, Left, &grid))
+                res2 := float64(countEnergizedTiles(x, y, Down, &grid))
+                result = int(math.Max(res1, res2))
+            } else {
+                if x == 0 {
+                    result = countEnergizedTiles(x, y, Right, &grid)
+                }
+                if y == 0 {
+                    result = countEnergizedTiles(x, y, Down, &grid)
+                }
+                if y == len(grid) - 1 {
+                    result = countEnergizedTiles(x, y, Left, &grid)
+                }
+                if x == len(grid[0]) - 1 {
+                    result = countEnergizedTiles(x, y, Up, &grid)
+                }
+            }
+
+            if result > output {
+                output = result
+            }
+        }
+    }
+    return output
+}
+
 func main() {
     input, err := utils.ReadInputFile(2023, 16)
     if err != nil {
         log.Fatal(err)
     }
     fmt.Println("Answer to part 1:", part1(input))
+    fmt.Println("Answer to part 2:", part2(input))
 }
 
